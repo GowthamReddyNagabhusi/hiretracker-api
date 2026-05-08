@@ -10,6 +10,16 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: hiretrack123
+          MYSQL_DATABASE: hiretrackdb
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -32,7 +42,7 @@ jobs:
         run: mvn clean install -DskipTests
 
       - name: Run Tests
-        run: mvn test
+        run: mvn test -Dspring.datasource.url=jdbc:mysql://localhost:3306/hiretrackdb -Dspring.datasource.username=root -Dspring.datasource.password=hiretrack123
 
       - name: Build Docker Image
         run: docker build -t hiretrack-api:latest .
