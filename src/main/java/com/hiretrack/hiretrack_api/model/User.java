@@ -1,5 +1,7 @@
 package com.hiretrack.hiretrack_api.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -20,7 +22,7 @@ public class User {
     @NotBlank(message = "Email is required")
     @Column(nullable = false, unique = true)
     private String email;
-
+    @JsonIgnore
     @NotBlank(message = "Password is required")
     @Column(nullable = false)
     private String password;
