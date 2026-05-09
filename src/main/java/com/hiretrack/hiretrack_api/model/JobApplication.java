@@ -5,7 +5,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
-
 @Entity
 @Table(name = "job_applications")
 public class JobApplication {
@@ -36,7 +35,19 @@ public class JobApplication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
+    @Column
+    private String resumeFileName;
 
+    @Column
+    private String resumeFilePath;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private Priority priority = Priority.MEDIUM;
+
+    public enum Priority {
+        HIGH, MEDIUM, LOW
+    }
     public enum Status {
         APPLIED, INTERVIEW, OFFER, REJECTED
     }
@@ -63,4 +74,12 @@ public class JobApplication {
 
     public User getUser() { return user; }
     public void setUser(User user) { this.user = user; }
+    public String getResumeFileName() { return resumeFileName; }
+    public void setResumeFileName(String resumeFileName) { this.resumeFileName = resumeFileName; }
+
+    public String getResumeFilePath() { return resumeFilePath; }
+    public void setResumeFilePath(String resumeFilePath) { this.resumeFilePath = resumeFilePath; }
+
+    public Priority getPriority() { return priority; }
+    public void setPriority(Priority priority) { this.priority = priority; }
 }

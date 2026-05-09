@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
+import com.hiretrack.hiretrack_api.model.JobApplication;
 
 public class JobApplicationRequest {
     @NotBlank(message = "Company is required")
@@ -19,6 +20,7 @@ public class JobApplicationRequest {
 
     @NotNull(message = "Applied date is required")
     private LocalDate appliedDate;
+    private JobApplication.Priority priority = JobApplication.Priority.MEDIUM;
 
     public String getCompany() { return company; }
     public void setCompany(String company) { this.company = company; }
@@ -34,4 +36,6 @@ public class JobApplicationRequest {
 
     public LocalDate getAppliedDate() { return appliedDate; }
     public void setAppliedDate(LocalDate appliedDate) { this.appliedDate = appliedDate; }
+    public JobApplication.Priority getPriority() { return priority; }
+    public void setPriority(JobApplication.Priority priority) { this.priority = priority; }
 }
