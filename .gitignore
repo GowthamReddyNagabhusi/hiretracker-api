@@ -23,6 +23,10 @@ spring-pid
 # Environment & Secrets
 .env
 application-local.properties
+**/application-dev.properties
+
+# Uploads
+uploads/
 
 # OS
 .DS_Store

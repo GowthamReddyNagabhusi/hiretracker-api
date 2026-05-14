@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    environment {
+        JAVA_HOME = tool 'JDK17'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -9,48 +13,47 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
-                echo 'Building with Maven...'
-                bat 'mvnw.cmd clean install -DskipTests'
+                echo 'Building and testing with Maven...'
+                // Use sh for Linux agents, bat for Windows — detect OS
+                script {
+                    if (isUnix()) {
+                        sh 'chmod +x mvnw && ./mvnw clean verify -B'
+                    } else {
+                        bat 'mvnw.cmd clean verify -B'
+                    }
+                }
             }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                bat 'mvnw.cmd test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                echo 'Packaging JAR...'
-                bat 'mvnw.cmd package -DskipTests'
+            post {
+                always {
+                    // Archive test reports
+                    junit allowEmptyResults: true, testResults: 'target/surefire-reports/*.xml'
+                }
             }
         }
 
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
-                bat 'docker build -t hiretrack-api:latest .'
-            }
-        }
-
-        stage('Done') {
-            steps {
-                echo 'Pipeline completed successfully!'
-                echo 'Image hiretrack-api:latest is ready for deployment.'
+                script {
+                    def imageTag = "hiretrack-api:${env.BUILD_NUMBER}"
+                    if (isUnix()) {
+                        sh "docker build -t ${imageTag} ."
+                    } else {
+                        bat "docker build -t ${imageTag} ."
+                    }
+                }
             }
         }
     }
 
     post {
         success {
-            echo 'BUILD SUCCESSFUL - HireTrack API is ready!'
+            echo "BUILD #${env.BUILD_NUMBER} SUCCESSFUL — HireTrack API is ready!"
         }
         failure {
-            echo 'BUILD FAILED - Check the logs above.'
+            echo "BUILD #${env.BUILD_NUMBER} FAILED — Check the logs above."
         }
     }
 }

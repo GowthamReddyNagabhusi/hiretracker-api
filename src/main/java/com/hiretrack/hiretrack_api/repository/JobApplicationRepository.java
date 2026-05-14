@@ -15,5 +15,6 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
     Page<JobApplication> findByUser(User user, Pageable pageable);
     List<JobApplication> findByUserAndStatus(User user, JobApplication.Status status);
     List<JobApplication> findByUserAndCompanyContainingIgnoreCase(User user, String company);
+    long countByUser(User user);
     long countByUserAndStatus(User user, JobApplication.Status status);
 }

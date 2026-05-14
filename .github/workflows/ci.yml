@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ main ]
 
+env:
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -14,21 +18,21 @@ jobs:
       mysql:
         image: mysql:8.0
         env:
-          MYSQL_ROOT_PASSWORD: hiretrack123
-          MYSQL_DATABASE: hiretrackdb
+          MYSQL_ROOT_PASSWORD: ${{ secrets.CI_MYSQL_PASSWORD || 'ci-test-password-only' }}
+          MYSQL_DATABASE: hiretrackdb_test
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=5
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Set up Java 17
+      - name: Set up Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          java-version: '17'
-          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
 
       - name: Cache Maven Dependencies
         uses: actions/cache@v4
@@ -39,11 +43,24 @@ jobs:
             ${{ runner.os }}-maven-
 
       - name: Build with Maven
-        run: mvn clean install -DskipTests
+        run: mvn clean install -DskipTests -B -q
 
       - name: Run Tests
-        run: mvn test -Dspring.datasource.url=jdbc:mysql://localhost:3306/hiretrackdb -Dspring.datasource.username=root -Dspring.datasource.password=hiretrack123
+        env:
+          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/hiretrackdb_test
+          SPRING_DATASOURCE_USERNAME: root
+          SPRING_DATASOURCE_PASSWORD: ${{ secrets.CI_MYSQL_PASSWORD || 'ci-test-password-only' }}
+          JWT_SECRET: ci-test-jwt-secret-key-min-32-characters-long
+          SPRING_PROFILES_ACTIVE: test
+        run: mvn test -B
 
       - name: Build Docker Image
-        run: docker build -t hiretrack-api:latest .
-        
+        run: docker build -t hiretrack-api:${{ github.sha }} .
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: target/surefire-reports/
+          retention-days: 7

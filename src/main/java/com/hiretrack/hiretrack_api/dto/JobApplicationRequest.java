@@ -3,12 +3,13 @@ package com.hiretrack.hiretrack_api.dto;
 import com.hiretrack.hiretrack_api.model.JobApplication;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
-import com.hiretrack.hiretrack_api.model.JobApplication;
 
 public class JobApplicationRequest {
     @NotBlank(message = "Company is required")
+    @Size(max = 255, message = "Company name must not exceed 255 characters")
     private String company;
 
     @NotBlank(message = "Role is required")

@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -20,11 +21,14 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomUserDetailsService userDetailsService;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     public SecurityConfig(JwtAuthFilter jwtAuthFilter,
-                          CustomUserDetailsService userDetailsService) {
+                          CustomUserDetailsService userDetailsService,
+                          CorsConfigurationSource corsConfigurationSource) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.userDetailsService = userDetailsService;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     @Bean
@@ -48,14 +52,37 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            // CORS — uses our CorsConfig bean
+            .cors(cors -> cors.configurationSource(corsConfigurationSource))
+
+            // CSRF — disabled because we use stateless JWT auth (no cookies/sessions)
             .csrf(csrf -> csrf.disable())
+
+            // Security headers
+            .headers(headers -> headers
+                .contentTypeOptions(content -> {})                           // X-Content-Type-Options: nosniff
+                .frameOptions(frame -> frame.deny())                         // X-Frame-Options: DENY
+                .httpStrictTransportSecurity(hsts -> hsts                     // HSTS
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000)
+                )
+            )
+
+            // Authorization rules
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/api/auth/register", "/api/auth/login", "/api/auth/refresh").permitAll()
+                .requestMatchers("/actuator/health").permitAll()              // Health check (no auth)
+                .requestMatchers("/actuator/**").hasRole("ADMIN")            // Other actuator endpoints locked
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll() // API docs
                 .anyRequest().authenticated()
             )
+
+            // Stateless session — no server-side sessions
             .sessionManagement(session -> session
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
+
+            // Authentication
             .authenticationProvider(authenticationProvider())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 

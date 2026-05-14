@@ -1,0 +1,49 @@
+# ============================================================
+# Docker Build Context — Exclude unnecessary files
+# ============================================================
+# Without this, Docker COPY sends everything (Git history,
+# node_modules, IDE files) into the build context, making
+# builds slow and images large.
+# ============================================================
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# IDE
+.idea
+.vscode
+*.iml
+*.iws
+*.ipr
+
+# Documentation
+*.md
+LICENSE
+
+# CI/CD
+.github
+Jenkinsfile
+
+# Frontend (built separately)
+frontend
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Maven build output (we build inside Docker)
+target
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs
+
+# Uploads
+uploads
