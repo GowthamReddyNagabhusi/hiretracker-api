@@ -14,16 +14,6 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:8.0
-        env:
-          MYSQL_ROOT_PASSWORD: ${{ secrets.CI_MYSQL_PASSWORD || 'ci-test-password-only' }}
-          MYSQL_DATABASE: hiretrackdb_test
-        ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping -p$$MYSQL_ROOT_PASSWORD" --health-interval=10s --health-timeout=5s --health-retries=5
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -47,9 +37,6 @@ jobs:
 
       - name: Run Tests
         env:
-          SPRING_DATASOURCE_URL: jdbc:mysql://localhost:3306/hiretrackdb_test
-          SPRING_DATASOURCE_USERNAME: root
-          SPRING_DATASOURCE_PASSWORD: ${{ secrets.CI_MYSQL_PASSWORD || 'ci-test-password-only' }}
           JWT_SECRET: ci-test-jwt-secret-key-min-32-characters-long
           SPRING_PROFILES_ACTIVE: test
         run: mvn test -B
