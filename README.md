@@ -6,40 +6,45 @@ A production-ready **Job Application Tracker REST API** built with Spring Boot, 
 
 | Layer | Technology |
 |-------|-----------|
-| Backend | Java 17 + Spring Boot 4.0 |
-| Database | MySQL 8.0 |
-| Security | JWT (JSON Web Token) |
-| Build Tool | Maven |
-| Containerization | Docker + Docker Compose |
-| CI/CD | Jenkins + GitHub Actions |
+| **Backend** | Java 17 + Spring Boot 4.0 |
+| **Database** | MySQL 8.0 |
+| **Security** | JWT (JSON Web Token) |
+| **Build Tool** | Maven |
+| **Containerization** | Docker + Docker Compose |
+| **CI/CD** | Jenkins + GitHub Actions |
 
 ## 📌 Features
 
-- User Registration & Login with JWT Authentication
-- Add, Update, Delete Job Applications
-- Status Workflow: `APPLIED → INTERVIEW → OFFER → REJECTED`
-- Filter by Status or Company Name
-- Dashboard Stats (total applied, offers, rejection rate)
+- **User Authentication**: Secure user registration and login using JWT.
+- **Job Applications Management**: Create, read, update, and delete (CRUD) job applications.
+- **Status Workflow**: Track application states (`APPLIED → INTERVIEW → OFFER → REJECTED`).
+- **Advanced Filtering**: Filter applications by status or company name.
+- **Dashboard Stats**: View overall metrics including total applied, active offers, and rejection rates.
 
 ## 🚀 API Endpoints
 
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/auth/register` | Register new user | Public |
-| POST | `/api/auth/login` | Login & get JWT token | Public |
-| GET | `/api/jobs` | Get all your applications | Required |
-| POST | `/api/jobs` | Add new application | Required |
-| PUT | `/api/jobs/{id}` | Update application | Required |
-| DELETE | `/api/jobs/{id}` | Delete application | Required |
-| GET | `/api/jobs/stats` | Get dashboard stats | Required |
-| GET | `/api/jobs/filter` | Filter by status/company | Required |
+### Authentication
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| POST   | `/api/auth/register` | Register a new user | No |
+| POST   | `/api/auth/login`    | Login & receive JWT | No |
+
+### Jobs Management
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET    | `/api/jobs`          | Retrieve all job applications | Yes |
+| POST   | `/api/jobs`          | Create a new application | Yes |
+| PUT    | `/api/jobs/{id}`     | Update an application | Yes |
+| DELETE | `/api/jobs/{id}`     | Delete an application | Yes |
+| GET    | `/api/jobs/stats`    | Retrieve dashboard statistics | Yes |
+| GET    | `/api/jobs/filter`   | Filter applications by status/company | Yes |
 
 ## ⚙️ Setup & Run Locally
 
 ### Prerequisites
-- Java 17+
-- Docker Desktop
-- Maven
+- [Java 17+](https://adoptium.net/)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Maven](https://maven.apache.org/)
 
 ### 1. Clone the repository
 ```bash
@@ -48,13 +53,26 @@ cd hiretracker-api
 ```
 
 ### 2. Start MySQL with Docker
+You can easily spin up the required MySQL database using Docker Compose:
 ```bash
 docker-compose up -d mysql
 ```
 
 ### 3. Run the application
+Start the Spring Boot application using the Maven wrapper:
 ```bash
-mvnw spring-boot:run
+./mvnw spring-boot:run
 ```
 
-### 4. API is live at
+### 4. API is Live
+The API will be accessible at:
+```text
+http://localhost:8080
+```
+Use tools like [Postman](https://www.postman.com/) or [cURL](https://curl.se/) to interact with the API endpoints.
+
+## 🛡️ Continuous Integration
+This project uses **GitHub Actions** for CI/CD. The pipeline automatically:
+1. Provisions a test MySQL database.
+2. Compiles and tests the code using Maven.
+3. Builds the production Docker image.
